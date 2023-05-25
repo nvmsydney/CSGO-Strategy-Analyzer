@@ -62,12 +62,15 @@ class ProcessGameState:
 
 
 if __name__ == '__main__':
-    data_path = 'C:\\Users\\melos\\OneDrive\\Desktop\\CSGO-Strategy-Analyzer\\data\\game_state_frame_data.parquet'
+    data_path = 'game_state_frame_data.parquet'
 
     process_strategies = ProcessGameState(data_path)
-
     process_strategies.read_data()
 
-    weapon_classes = process_strategies.extract_weapon_classes()
+    # Is entering via the light blue boundary a common strategy used by Team2 on T side?
 
-    print(weapon_classes)
+    # What is the average timer that Team2 on T side enters "BombsiteB" with at least 2 rifles or SMGs?
+
+    # Where will Team2, T side, be waiting inside "BombsiteB"?
+
+    # Solution that allows the coaching staff to request or acquire the output themselves:
