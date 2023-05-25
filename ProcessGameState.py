@@ -52,19 +52,22 @@ class ProcessGameState:
         return within_boundary
 
     def extract_weapon_classes(self):
-        return self.data['inventory']
+        if 'inventory' not in self.columns:
+            raise ValueError("Inventory column does not exist.")
+
+        key = 'weapon_class'
+
+        self.data[key] = self.data['inventory'].apply(lambda x: [item[key] for item in x] if x is not None else None)
+        return self.data[key]
 
 
 if __name__ == '__main__':
-    data_path = 'game_state_frame_data.parquet'
+    data_path = 'C:\\Users\\melos\\OneDrive\\Desktop\\CSGO-Strategy-Analyzer\\data\\game_state_frame_data.parquet'
 
     process_strategies = ProcessGameState(data_path)
 
     process_strategies.read_data()
 
-    process_strategies.set_boundaries('tick', 1000, 2000)
-    process_strategies.set_boundaries('hp', 0, 50)
+    weapon_classes = process_strategies.extract_weapon_classes()
 
-    print(process_strategies.check_boundaries())
-
-    print(process_strategies.extract_weapon_classes())
+    print(weapon_classes)
