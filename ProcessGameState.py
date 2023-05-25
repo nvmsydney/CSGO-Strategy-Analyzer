@@ -1,3 +1,16 @@
+"""
+***********************************************************************
+Function: ProcessGameState.py handles file ingestion/ETL and is
+able to extract different columns from a data file for analysis
+----------------------------------------------------------------------
+Input: data file path
+Output: filtered match data
+----------------------------------------------------------------------
+Author: Sydney Nguyen
+Version: 05/24/2023
+**********************************************************************
+"""
+
 import pandas as pd
 
 
@@ -6,74 +19,52 @@ class ProcessGameState:
         self.file_path = file_path
         self.data = None
         self.columns = None
+        self.boundaries = {}
 
     def read_data(self):
         self.data = pd.read_parquet(self.file_path)
-        self.columns = self.data.columns.tolist()
+        self.columns = self.data.columns
 
     def load_data(self):
         return self.data
+
+    def set_boundaries(self, column, lower_bound, upper_bound):
+        self.boundaries[column] = (lower_bound, upper_bound)
 
     def check_boundaries(self):
         if self.columns is None:
             raise ValueError("Call read_data() before checking boundaries")
 
-        boundary = {
-            'round_num': (1, 30),
-            'tick': (0, 3000),
-            'side': ('T', 'CT'),
-            'team': ('Team1', 'Team2'),
-            'hp': (0, 100),
-            'armor': (0, 100),
-            'is_alive': (False, True),
-            'total_utility': (0, 4),
-            'equipment_value': (0, 5000),
-            'area_name': ['TSpawn', 'TStairs', 'Tunnels', 'Fountain', 'LowerPark', 'Playground'],
-            'seconds': (0, 60),
-            'clock_time': ('00:00', '10:00'),
-            't_alive': (1, 5),
-            'ct_alive': (1, 5),
-            'bomb_planted': (False, True),
-            'map_name': 'de_overpass',
-            'utility_used': (0, 10),
-        }
-
         within_boundary = pd.Series(True, index=self.data.index)
 
         for column in self.columns:
-            if column in boundary:
-                bound = boundary[column]
+            if column in self.data.columns and column in self.boundaries:
+                column_data = self.data[column]
+                bound = self.boundaries[column]
 
-                if isinstance(bound, tuple):
+                if pd.api.types.is_numeric_dtype(column_data):
                     lower_bound, upper_bound = bound
-                    if lower_bound is not None:
-                        within_boundary &= self.data[column] >= lower_bound
-                    if upper_bound is not None:
-                        within_boundary &= self.data[column] <= upper_bound
+                    within_boundary &= column_data.between(lower_bound, upper_bound)
                 else:
-                    within_boundary &= self.data[column].isin([bound])
+                    unique_values = bound
+                    within_boundary &= column_data.isin(unique_values)
 
         return within_boundary
 
+    def extract_weapon_classes(self):
+        return self.data['inventory']
+
 
 if __name__ == '__main__':
-    # Retrieve the file path to the data
-    file_path = 'C:\\Users\\melos\\OneDrive\\Desktop\\CSGO-Strategy-Analyzer\\data\\game_state_frame_data.parquet'
+    file_path = 'game_state_frame_data.parquet'
 
-    # Create a ProcessGameState object that takes in the file path
-    game_state_processor = ProcessGameState(file_path)
+    process_strategies = ProcessGameState(file_path)
 
-    # Ingest the data
-    game_state_processor.read_data()
+    process_strategies.read_data()
 
-    # Check the boundaries
-    within_boundary = game_state_processor.check_boundaries()
+    process_strategies.set_boundaries('tick', 1000, 2000)
+    process_strategies.set_boundaries('hp', 0, 50)
 
-    # Filter the data that makes it past the boundary check
-    filtered_data = game_state_processor.load_data()[within_boundary]
+    print(process_strategies.check_boundaries())
 
-    # Print the data
-    for column in game_state_processor.columns:
-        print(f"{column}")
-        for _, row in filtered_data.iterrows():
-            print("\t".join(str(value) for value in row[column]))
+    print(process_strategies.extract_weapon_classes())
