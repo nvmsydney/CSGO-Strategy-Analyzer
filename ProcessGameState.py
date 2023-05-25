@@ -56,9 +56,9 @@ class ProcessGameState:
 
 
 if __name__ == '__main__':
-    file_path = 'game_state_frame_data.parquet'
+    data_path = 'game_state_frame_data.parquet'
 
-    process_strategies = ProcessGameState(file_path)
+    process_strategies = ProcessGameState(data_path)
 
     process_strategies.read_data()
 
