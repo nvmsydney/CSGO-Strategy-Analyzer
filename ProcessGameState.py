@@ -15,22 +15,29 @@ import pandas as pd
 
 
 class ProcessGameState:
+
+    # ProcessGameState is created with a file path as the parameter
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
         self.columns = None
         self.boundaries = {}
 
+    # Reads the file path and sets the columns to self.columns
     def read_data(self):
         self.data = pd.read_parquet(self.file_path)
         self.columns = self.data.columns
 
+    # Outputs the data file
     def load_data(self):
         return self.data
 
+    # Allows users to set a lower and upper bound to filter out data
+    # usage: process_game.set_boundaries('health', 0, 75)
     def set_boundaries(self, column, lower_bound, upper_bound):
         self.boundaries[column] = (lower_bound, upper_bound)
 
+    # Checks if each data set is in between user-provided boundaries and returns the data within those bounds
     def check_boundaries(self):
         if self.columns is None:
             raise ValueError("Call read_data() before checking boundaries")
@@ -51,6 +58,7 @@ class ProcessGameState:
 
         return within_boundary
 
+    # Extracts the weapon class within the inventory column and returns it
     def extract_weapon_classes(self):
         if 'inventory' not in self.columns:
             raise ValueError("Inventory column does not exist.")
@@ -66,11 +74,3 @@ if __name__ == '__main__':
 
     process_strategies = ProcessGameState(data_path)
     process_strategies.read_data()
-
-    # Is entering via the light blue boundary a common strategy used by Team2 on T side?
-
-    # What is the average timer that Team2 on T side enters "BombsiteB" with at least 2 rifles or SMGs?
-
-    # Where will Team2, T side, be waiting inside "BombsiteB"?
-
-    # Solution that allows the coaching staff to request or acquire the output themselves:
