@@ -1,7 +1,16 @@
 2a) Is entering via the light blue boundary a common strategy used by Team2 on T side?
+A: No, it's not a common strategy. There were only 23 players who entered via the light blue boundary.
 
 2b) What is the average timer that Team2 on T side enters "BombsiteB" with at least 2 rifles or SMGs?
+A: 40.2 seconds
 
 2c) Where will Team2, T side, be waiting inside "BombsiteB"?
+A: TSpawn, Fountain, Tunnels, Water, UpperPark, LowerPark
 
 3) Solution that allows the coaching staff to request or acquire the output themselves:
+A: The quickest solution for the coaching staff to acquire the output themselves is a command line
+ interface, but the most user-friendly is a web-based GUI or desktop application using HTML, CSS, and JavaScript,
+ or Tkinter. With a command line interface, I could document how to run the script, specify arguments, and provide
+ inputs with prompts. They would be able to follow this easily, but the most practical approach would be the
+ web-based GUI or desktop application just because a step-by-step guide isn't needed. This can be created using Django
+ and styled with HTML, CSS, and JavaScript.
