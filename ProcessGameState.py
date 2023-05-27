@@ -82,7 +82,7 @@ class ProcessGameState:
 
 
 if __name__ == '__main__':
-    data_path = 'C:\\Users\\melos\\OneDrive\\Desktop\\CSGO-Strategy-Analyzer\\data\\game_state_frame_data.parquet'
+    data_path = 'game_state_frame_data.parquet'
 
     pd.set_option('display.max_columns', 22)
     pd.set_option('display.max_rows', 100)
