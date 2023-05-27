@@ -3,7 +3,7 @@
 Function: ProcessGameState.py handles file ingestion/ETL and is
 able to extract different columns from a data file for analysis
 ----------------------------------------------------------------------
-Input: data file path
+Input: data file path, desired filters / boundaries
 Output: filtered match data
 ----------------------------------------------------------------------
 Author: Sydney Nguyen
@@ -37,6 +37,18 @@ class ProcessGameState:
     def set_boundaries(self, column, lower_bound, upper_bound):
         self.boundaries[column] = (lower_bound, upper_bound)
 
+    def remove_boundaries(self):
+        self.boundaries = {}
+
+    def set_team(self, team):
+        self.boundaries['team'] = team
+
+    def set_side(self, side):
+        self.boundaries['side'] = side
+
+    def set_site(self, site):
+        self.boundaries['site'] = site
+
     # Checks if each data set is in between user-provided boundaries and returns the data within those bounds
     def check_boundaries(self):
         if self.columns is None:
@@ -53,7 +65,7 @@ class ProcessGameState:
                     lower_bound, upper_bound = bound
                     within_boundary &= column_data.between(lower_bound, upper_bound)
                 else:
-                    unique_values = bound
+                    unique_values = [bound]
                     within_boundary &= column_data.isin(unique_values)
 
         return within_boundary
@@ -70,7 +82,39 @@ class ProcessGameState:
 
 
 if __name__ == '__main__':
-    data_path = 'game_state_frame_data.parquet'
+    data_path = 'C:\\Users\\melos\\OneDrive\\Desktop\\CSGO-Strategy-Analyzer\\data\\game_state_frame_data.parquet'
+
+    pd.set_option('display.max_columns', 22)
+    pd.set_option('display.max_rows', 100)
 
     process_strategies = ProcessGameState(data_path)
     process_strategies.read_data()
+
+    # Filtering results to show T side, Team 2, in the light blue boundary
+    process_strategies.set_team("Team2")
+    process_strategies.set_side("T")
+    process_strategies.set_boundaries('z', 285, 421)
+    process_strategies.set_boundaries('y', 250, 1233)
+    process_strategies.set_boundaries('x', -2806, -1565)
+
+    within_bounds = process_strategies.check_boundaries()
+    filtered_data = process_strategies.load_data()[within_bounds]
+
+    print(filtered_data)
+    print(filtered_data.shape[0])
+
+    process_strategies.remove_boundaries()
+
+    # Checking average timer that Team2 on T side enters Bombsite B with at least 2 rifles or SMGs
+    process_strategies.set_side("T")
+    process_strategies.set_team("Team2")
+    process_strategies.set_site("BombsiteB")
+    weapon_classes = process_strategies.extract_weapon_classes()
+    is_rifle_or_smg = weapon_classes.apply(lambda x: x.count("Rifle") + x.count("SMG") if x is not None else 0 >= 2)
+    process_strategies.set_boundaries("weapon_class", is_rifle_or_smg, is_rifle_or_smg)
+    within_bounds = process_strategies.check_boundaries()
+    filtered_data = process_strategies.load_data()[within_bounds]
+    avg_timer = filtered_data['seconds'].mean()
+    print(filtered_data)
+    print(f"\n{avg_timer}")
+    print(filtered_data.shape[0])
